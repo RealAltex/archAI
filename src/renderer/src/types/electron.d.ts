@@ -1,7 +1,7 @@
 export interface IElectronAPI {
      llm: {
           startStream: (messages: Array<{ role: string; content: string }>, config: {
-               provider: string; apiKey: string; baseURL: string;
+               provider: string; baseURL: string;
                model: string; temperature: number; maxTokens: number
           }) => void
           onChunk: (callback: (chunk: string) => void) => () => void
@@ -13,11 +13,21 @@ export interface IElectronAPI {
           get: (key: string) => Promise<unknown>
           set: (key: string, value: unknown) => Promise<void>
           getAll: () => Promise<Record<string, unknown>>
+          setApiKey: (apiKey: string) => Promise<void>
+          hasApiKey: () => Promise<boolean>
      }
      files: {
           save: (content: string, defaultPath?: string) => Promise<string | null>
           open: () => Promise<{ content: string; path: string } | null>
           exportMD: (content: string) => Promise<string | null>
+          scanFolder: () => Promise<{
+               folderPath: string
+               folderName: string
+               tree: string
+               keyFiles: Array<{ name: string; content: string }>
+               fileCount: number
+               dirCount: number
+          }>
      }
      projects: {
           save: (id: string, data: unknown) => Promise<void>

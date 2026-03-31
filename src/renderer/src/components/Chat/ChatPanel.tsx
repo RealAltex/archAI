@@ -46,10 +46,20 @@ export function ChatPanel() {
                {/* Messages */}
                <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4">
                     {messages.length === 0 && !isStreaming && (
-                         <div className="text-center text-gray-400 dark:text-gray-600 mt-8">
-                              <p className="text-lg mb-2">🏗️</p>
-                              <p className="text-sm">Describe the software architecture you want to plan.</p>
-                              <p className="text-xs mt-1 text-gray-400">e.g. &quot;Design a microservices e-commerce platform&quot;</p>
+                         <div className="text-center text-gray-400 dark:text-gray-500 mt-12 px-6">
+                              <p className="text-2xl mb-3">🏗️</p>
+                              <p className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
+                                   Beschreib einfach deine Software-Idee
+                              </p>
+                              <p className="text-xs leading-relaxed text-gray-400 dark:text-gray-500">
+                                   Egal ob nur eine vage Idee, ein konkreter Plan oder ein bestehendes Projekt
+                                   — ich denke mit und baue die Architektur für dich auf.
+                              </p>
+                              <div className="mt-4 space-y-1.5 text-xs text-gray-400 dark:text-gray-600">
+                                   <p>&quot;Ich will eine App bauen, mit der man Rezepte teilen kann&quot;</p>
+                                   <p>&quot;Ich plane ein SaaS mit React Frontend und Python Backend&quot;</p>
+                                   <p>&quot;Ich hab schon ein Express Backend, brauche aber eine bessere Struktur&quot;</p>
+                              </div>
                          </div>
                     )}
 

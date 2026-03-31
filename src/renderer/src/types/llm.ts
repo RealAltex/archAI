@@ -2,7 +2,6 @@ export type LLMProvider = 'openai' | 'anthropic' | 'ollama' | 'lmstudio' | 'cust
 
 export interface LLMConfig {
      provider: LLMProvider
-     apiKey: string
      baseURL: string
      model: string
      temperature: number
@@ -11,7 +10,6 @@ export interface LLMConfig {
 
 export const DEFAULT_LLM_CONFIG: LLMConfig = {
      provider: 'openai',
-     apiKey: '',
      baseURL: 'https://api.openai.com/v1',
      model: 'gpt-4o',
      temperature: 0.7,

@@ -1,74 +1,155 @@
 import { Handle, Position, type NodeProps } from '@xyflow/react'
+import { Server, Box, Puzzle, Code2 } from 'lucide-react'
 import type { FlowNodeData } from '../../../lib/flow-adapter'
 
-export function SystemNode({ data }: NodeProps) {
-     const d = data as FlowNodeData
+const levelConfig = {
+     system: { label: 'System', icon: Server, color: 'var(--node-system)' },
+     container: { label: 'Service', icon: Box, color: 'var(--node-container)' },
+     component: { label: 'Module', icon: Puzzle, color: 'var(--node-component)' },
+     code: { label: 'Code', icon: Code2, color: 'var(--node-code)' }
+} as const
+
+function TechBadge({ tech, color }: { tech: string; color: string }) {
      return (
-          <div className="min-w-[260px] rounded-lg border-2 border-blue-500 bg-blue-50 shadow-md dark:bg-blue-950 dark:border-blue-400">
-               <div className="bg-blue-500 dark:bg-blue-600 px-4 py-2 rounded-t-md">
-                    <div className="text-white font-bold text-sm">{d.label}</div>
+          <span
+               className="inline-block text-[10px] font-medium px-2 py-0.5 rounded-md"
+               style={{ background: `color-mix(in srgb, ${color} 12%, transparent)`, color }}
+          >
+               {tech}
+          </span>
+     )
+}
+
+function NodeHandle({ type, position, color }: { type: 'target' | 'source'; position: Position; color: string }) {
+     return (
+          <Handle
+               type={type}
+               position={position}
+               className="!w-2 !h-2 !border-[1.5px] !rounded-full"
+               style={{ background: color, borderColor: 'var(--surface-1)' }}
+          />
+     )
+}
+
+export function SystemNode({ data, selected }: NodeProps) {
+     const d = data as FlowNodeData
+     const cfg = levelConfig.system
+     return (
+          <div
+               className="min-w-[280px] rounded-xl shadow-lg transition-shadow"
+               style={{
+                    background: 'var(--surface-1)',
+                    border: selected ? `2px solid ${cfg.color}` : '1px solid var(--border)',
+                    boxShadow: selected ? `0 0 0 3px color-mix(in srgb, ${cfg.color} 20%, transparent)` : undefined
+               }}
+          >
+               <div
+                    className="px-4 py-2.5 rounded-t-[10px] flex items-center justify-between"
+                    style={{ background: `linear-gradient(135deg, ${cfg.color}, color-mix(in srgb, ${cfg.color} 80%, #000))` }}
+               >
+                    <div className="flex items-center gap-2 text-white">
+                         <Server size={14} strokeWidth={2} />
+                         <span className="font-semibold text-sm">{d.label}</span>
+                    </div>
+                    <span className="text-[10px] uppercase tracking-wider font-medium opacity-70 text-white">{cfg.label}</span>
                </div>
-               <div className="px-4 py-3">
-                    {d.technology && (
-                         <span className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-xs px-2 py-0.5 rounded mb-1">
-                              {d.technology}
-                         </span>
-                    )}
+               <div className="px-4 py-3 space-y-2">
+                    {d.technology && <TechBadge tech={d.technology} color={cfg.color} />}
                     {d.description && (
-                         <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{d.description}</p>
+                         <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{d.description}</p>
                     )}
                </div>
-               <Handle type="target" position={Position.Top} className="!bg-blue-500" />
-               <Handle type="source" position={Position.Bottom} className="!bg-blue-500" />
+               <NodeHandle type="target" position={Position.Top} color={cfg.color} />
+               <NodeHandle type="source" position={Position.Bottom} color={cfg.color} />
           </div>
      )
 }
 
-export function ContainerNode({ data }: NodeProps) {
+export function ContainerNode({ data, selected }: NodeProps) {
      const d = data as FlowNodeData
+     const cfg = levelConfig.container
      return (
-          <div className="min-w-[220px] rounded-lg border-2 border-green-500 bg-green-50 shadow-sm dark:bg-green-950 dark:border-green-400">
-               <div className="px-3 py-2">
-                    <div className="font-semibold text-sm text-green-800 dark:text-green-200">{d.label}</div>
-                    {d.technology && (
-                         <span className="inline-block bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 text-xs px-2 py-0.5 rounded mt-1">
-                              {d.technology}
-                         </span>
-                    )}
+          <div
+               className="min-w-[240px] rounded-xl shadow-md transition-shadow"
+               style={{
+                    background: 'var(--surface-1)',
+                    border: selected ? `2px solid ${cfg.color}` : '1px solid var(--border)',
+                    boxShadow: selected ? `0 0 0 3px color-mix(in srgb, ${cfg.color} 20%, transparent)` : undefined
+               }}
+          >
+               <div className="px-4 py-2.5 flex items-center justify-between" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                    <div className="flex items-center gap-2">
+                         <Box size={13} strokeWidth={2} style={{ color: cfg.color }} />
+                         <span className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{d.label}</span>
+                    </div>
+                    <span className="text-[10px] uppercase tracking-wider font-medium" style={{ color: cfg.color }}>{cfg.label}</span>
+               </div>
+               <div className="px-4 py-2.5 space-y-2">
+                    {d.technology && <TechBadge tech={d.technology} color={cfg.color} />}
                     {d.description && (
-                         <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{d.description}</p>
+                         <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{d.description}</p>
                     )}
                </div>
-               <Handle type="target" position={Position.Top} className="!bg-green-500" />
-               <Handle type="source" position={Position.Bottom} className="!bg-green-500" />
+               <NodeHandle type="target" position={Position.Top} color={cfg.color} />
+               <NodeHandle type="source" position={Position.Bottom} color={cfg.color} />
           </div>
      )
 }
 
-export function ComponentNode({ data }: NodeProps) {
+export function ComponentNode({ data, selected }: NodeProps) {
      const d = data as FlowNodeData
+     const cfg = levelConfig.component
      return (
-          <div className="min-w-[180px] rounded-md border border-purple-400 bg-purple-50 shadow-sm dark:bg-purple-950 dark:border-purple-500 px-3 py-2">
-               <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-purple-500" />
-                    <span className="font-medium text-sm text-purple-800 dark:text-purple-200">{d.label}</span>
+          <div
+               className="min-w-[200px] rounded-lg shadow-sm transition-shadow"
+               style={{
+                    background: 'var(--surface-1)',
+                    border: selected ? `2px solid ${cfg.color}` : '1px solid var(--border)',
+                    boxShadow: selected ? `0 0 0 3px color-mix(in srgb, ${cfg.color} 20%, transparent)` : undefined
+               }}
+          >
+               <div className="px-3 py-2 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                         <Puzzle size={12} strokeWidth={2} style={{ color: cfg.color }} />
+                         <span className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>{d.label}</span>
+                    </div>
+                    <span className="text-[10px] uppercase tracking-wider font-medium" style={{ color: cfg.color }}>{cfg.label}</span>
                </div>
-               {d.technology && (
-                    <span className="text-xs text-purple-600 dark:text-purple-400">{d.technology}</span>
+               {(d.technology || d.description) && (
+                    <div className="px-3 pb-2 pl-7 space-y-1">
+                         {d.technology && <TechBadge tech={d.technology} color={cfg.color} />}
+                         {d.description && (
+                              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{d.description}</p>
+                         )}
+                    </div>
                )}
-               <Handle type="target" position={Position.Top} className="!bg-purple-500" />
-               <Handle type="source" position={Position.Bottom} className="!bg-purple-500" />
+               <NodeHandle type="target" position={Position.Top} color={cfg.color} />
+               <NodeHandle type="source" position={Position.Bottom} color={cfg.color} />
           </div>
      )
 }
 
-export function CodeNode({ data }: NodeProps) {
+export function CodeNode({ data, selected }: NodeProps) {
      const d = data as FlowNodeData
+     const cfg = levelConfig.code
      return (
-          <div className="min-w-[140px] rounded border border-gray-400 bg-gray-50 dark:bg-gray-900 dark:border-gray-600 px-2 py-1.5">
-               <span className="font-mono text-xs text-gray-700 dark:text-gray-300">{d.label}</span>
-               <Handle type="target" position={Position.Top} className="!bg-gray-500" />
-               <Handle type="source" position={Position.Bottom} className="!bg-gray-500" />
+          <div
+               className="min-w-[160px] rounded-md px-3 py-2 transition-shadow"
+               style={{
+                    background: 'var(--surface-2)',
+                    border: selected ? `2px solid ${cfg.color}` : '1px solid var(--border)',
+                    boxShadow: selected ? `0 0 0 3px color-mix(in srgb, ${cfg.color} 20%, transparent)` : undefined
+               }}
+          >
+               <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-1.5">
+                         <Code2 size={11} strokeWidth={2} style={{ color: cfg.color }} />
+                         <span className="font-mono text-xs" style={{ color: 'var(--text-primary)' }}>{d.label}</span>
+                    </div>
+                    <span className="text-[10px] uppercase tracking-wider font-medium" style={{ color: cfg.color }}>{cfg.label}</span>
+               </div>
+               <NodeHandle type="target" position={Position.Top} color={cfg.color} />
+               <NodeHandle type="source" position={Position.Bottom} color={cfg.color} />
           </div>
      )
 }

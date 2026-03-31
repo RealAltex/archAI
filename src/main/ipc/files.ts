@@ -7,9 +7,10 @@ import {
      saveProject,
      loadProject,
      listProjects,
-     deleteProject
+     deleteProject,
+     scanProjectFolder
 } from '../services/file-service'
-import { getSetting, setSetting, getAllSettings } from '../services/store-service'
+import { getSetting, setSetting, getAllSettings, setApiKey, hasApiKey } from '../services/store-service'
 
 export function registerFileHandlers(): void {
      ipcMain.handle(IPC.FILE_SAVE, async (_event, content: string, defaultPath?: string) => {
@@ -39,6 +40,10 @@ export function registerFileHandlers(): void {
      ipcMain.handle(IPC.PROJECT_DELETE, async (_event, id: string) => {
           return deleteProject(id)
      })
+
+     ipcMain.handle(IPC.FOLDER_SCAN, async () => {
+          return scanProjectFolder()
+     })
 }
 
 export function registerSettingsHandlers(): void {
@@ -52,5 +57,16 @@ export function registerSettingsHandlers(): void {
 
      ipcMain.handle(IPC.SETTINGS_GET_ALL, () => {
           return getAllSettings()
+     })
+
+     ipcMain.handle(IPC.SETTINGS_SET_API_KEY, (_event, apiKey: string) => {
+          if (typeof apiKey !== 'string') {
+               throw new Error('API key must be a string')
+          }
+          setApiKey(apiKey)
+     })
+
+     ipcMain.handle(IPC.SETTINGS_HAS_API_KEY, () => {
+          return hasApiKey()
      })
 }

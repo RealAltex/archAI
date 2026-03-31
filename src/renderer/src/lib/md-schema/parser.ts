@@ -6,8 +6,11 @@ const VALID_LEVELS: NodeLevel[] = ['system', 'container', 'component', 'code']
 export function parseMDSchema(md: string): ArchitectureData {
      const data: ArchitectureData = { title: 'Untitled', nodes: [], edges: [] }
 
+     // Normalize line endings
+     const normalized = md.replace(/\r\n/g, '\n').trim()
+
      // Parse YAML frontmatter
-     const frontmatterMatch = md.match(/^---\n([\s\S]*?)\n---/)
+     const frontmatterMatch = normalized.match(/^---\s*\n([\s\S]*?)\n---/)
      if (frontmatterMatch) {
           const fm = frontmatterMatch[1]
           const titleMatch = fm.match(/^title:\s*(.+)$/m)
@@ -16,8 +19,8 @@ export function parseMDSchema(md: string): ArchitectureData {
           if (descMatch) data.description = descMatch[1].trim()
      }
 
-     // Split by sections (# heading)
-     const sections = md.split(/^# /m).slice(1)
+     // Split by sections (# heading) — handle optional whitespace
+     const sections = normalized.split(/^#\s+/m).slice(1)
      const nodesByName = new Map<string, ArchNode>()
 
      for (const section of sections) {
@@ -25,12 +28,16 @@ export function parseMDSchema(md: string): ArchitectureData {
           const sectionName = lines[0].trim().toLowerCase()
 
           if (sectionName === 'connections') {
-               // Parse connections
+               // Parse connections — handle various arrow styles
                for (const line of lines.slice(1)) {
-                    const connMatch = line.match(/^- (.+?) --> (.+?):\s*"(.+?)"/)
+                    const connMatch = line.match(
+                         /^[-*]\s+(.+?)\s*-{1,3}>\s*(.+?):\s*"([^"]+)"/
+                    )
                     if (connMatch) {
-                         const sourceNode = nodesByName.get(connMatch[1].trim())
-                         const targetNode = nodesByName.get(connMatch[2].trim())
+                         const sourceName = connMatch[1].trim()
+                         const targetName = connMatch[2].trim()
+                         const sourceNode = nodesByName.get(sourceName)
+                         const targetNode = nodesByName.get(targetName)
                          if (sourceNode && targetNode) {
                               data.edges.push({
                                    id: nanoid(),
@@ -45,20 +52,24 @@ export function parseMDSchema(md: string): ArchitectureData {
           }
 
           // Parse nodes in this section
-          const nodeBlocks = section.split(/^## /m).slice(1)
+          const nodeBlocks = section.split(/^##\s+/m).slice(1)
           for (const block of nodeBlocks) {
                const blockLines = block.split('\n')
+               // Match: NodeName [level] — handle extra whitespace and trailing chars
                const headerMatch = blockLines[0].match(/^(.+?)\s*\[(\w+)\]/)
                if (!headerMatch) continue
 
                const label = headerMatch[1].trim()
-               const level = headerMatch[2] as NodeLevel
-               if (!VALID_LEVELS.includes(level)) continue
+               const levelRaw = headerMatch[2].toLowerCase() as NodeLevel
+               if (!VALID_LEVELS.includes(levelRaw)) continue
 
-               const node: ArchNode = { id: nanoid(), label, level }
+               const node: ArchNode = { id: nanoid(), label, level: levelRaw }
 
                for (const line of blockLines.slice(1)) {
-                    const metaMatch = line.match(/^- \*\*(\w+)\*\*:\s*(.+)$/)
+                    // Handle both **key** and *key* and key: formats
+                    const metaMatch = line.match(
+                         /^[-*]\s+\*{1,2}(\w+)\*{1,2}:\s*(.+)$/
+                    )
                     if (!metaMatch) continue
 
                     const key = metaMatch[1].toLowerCase()
@@ -72,8 +83,10 @@ export function parseMDSchema(md: string): ArchitectureData {
                               node.description = value
                               break
                          case 'parent':
-                              // Resolve later
-                              node.parentId = value
+                              // Skip null/none/empty parent values
+                              if (value && value !== 'null' && value !== 'none' && value !== '') {
+                                   node.parentId = value
+                              }
                               break
                          case 'tags':
                               node.tags = value.split(',').map((t) => t.trim())

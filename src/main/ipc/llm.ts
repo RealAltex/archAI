@@ -1,14 +1,21 @@
 import { ipcMain, BrowserWindow } from 'electron'
 import { IPC } from '../../shared/ipc-channels'
 import { llmService } from '../services/llm-service'
+import { getApiKey } from '../services/store-service'
 
 export function registerLLMHandlers(): void {
      ipcMain.on(IPC.LLM_STREAM_START, async (event, messages, config) => {
           const window = BrowserWindow.fromWebContents(event.sender)
           if (!window) return
 
+          // Inject API key from secure storage — never trust the renderer
+          const secureConfig = {
+               ...config,
+               apiKey: getApiKey()
+          }
+
           try {
-               for await (const chunk of llmService.streamChat(messages, config)) {
+               for await (const chunk of llmService.streamChat(messages, secureConfig)) {
                     if (window.isDestroyed()) return
                     event.sender.send(IPC.LLM_STREAM_CHUNK, chunk)
                }

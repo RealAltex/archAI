@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useSettingsStore } from '../../store/settings-store'
 import type { LLMProvider } from '../../types/llm'
 import { PROVIDER_DEFAULTS } from '../../types/llm'
@@ -9,12 +9,9 @@ interface SettingsDialogProps {
 }
 
 export function SettingsDialog({ isOpen, onClose }: SettingsDialogProps) {
-     const { llmConfig, theme, updateLLMConfig, setProvider, setTheme } = useSettingsStore()
-     const [apiKey, setApiKey] = useState(llmConfig.apiKey)
-
-     useEffect(() => {
-          setApiKey(llmConfig.apiKey)
-     }, [llmConfig.apiKey])
+     const { llmConfig, theme, hasApiKey, updateLLMConfig, setProvider, setTheme, setApiKey } = useSettingsStore()
+     const [apiKeyInput, setApiKeyInput] = useState('')
+     const [apiKeySaved, setApiKeySaved] = useState(false)
 
      if (!isOpen) return null
 
@@ -27,6 +24,15 @@ export function SettingsDialog({ isOpen, onClose }: SettingsDialogProps) {
      ]
 
      const needsApiKey = llmConfig.provider !== 'ollama' && llmConfig.provider !== 'lmstudio'
+
+     const handleSaveApiKey = async () => {
+          if (apiKeyInput.trim()) {
+               await setApiKey(apiKeyInput.trim())
+               setApiKeyInput('')
+               setApiKeySaved(true)
+               setTimeout(() => setApiKeySaved(false), 2000)
+          }
+     }
 
      return (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
@@ -56,20 +62,37 @@ export function SettingsDialog({ isOpen, onClose }: SettingsDialogProps) {
                               </select>
                          </div>
 
-                         {/* API Key */}
+                         {/* API Key — securely stored, never displayed */}
                          {needsApiKey && (
                               <div>
                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                         API Key
+                                        {hasApiKey && (
+                                             <span className="ml-2 text-xs text-green-600 dark:text-green-400">
+                                                  ✓ Encrypted & stored
+                                             </span>
+                                        )}
                                    </label>
-                                   <input
-                                        type="password"
-                                        value={apiKey}
-                                        onChange={(e) => setApiKey(e.target.value)}
-                                        onBlur={() => updateLLMConfig({ apiKey })}
-                                        placeholder="sk-..."
-                                        className="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg"
-                                   />
+                                   <div className="flex gap-2">
+                                        <input
+                                             type="password"
+                                             value={apiKeyInput}
+                                             onChange={(e) => setApiKeyInput(e.target.value)}
+                                             onKeyDown={(e) => e.key === 'Enter' && handleSaveApiKey()}
+                                             placeholder={hasApiKey ? '••••••••  (enter new key to replace)' : 'sk-...'}
+                                             className="flex-1 px-3 py-2 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg"
+                                        />
+                                        <button
+                                             onClick={handleSaveApiKey}
+                                             disabled={!apiKeyInput.trim()}
+                                             className="px-3 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                        >
+                                             {apiKeySaved ? '✓' : 'Save'}
+                                        </button>
+                                   </div>
+                                   <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                        Key is encrypted with OS-level encryption (DPAPI) and never leaves this device.
+                                   </p>
                               </div>
                          )}
 
@@ -126,8 +149,8 @@ export function SettingsDialog({ isOpen, onClose }: SettingsDialogProps) {
                                    <button
                                         onClick={() => setTheme('system')}
                                         className={`flex-1 px-3 py-2 text-sm rounded-lg border ${theme === 'system'
-                                                  ? 'bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                                                  : 'border-gray-200 dark:border-gray-700'
+                                             ? 'bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                                             : 'border-gray-200 dark:border-gray-700'
                                              }`}
                                    >
                                         💻 System
@@ -135,8 +158,8 @@ export function SettingsDialog({ isOpen, onClose }: SettingsDialogProps) {
                                    <button
                                         onClick={() => setTheme('light')}
                                         className={`flex-1 px-3 py-2 text-sm rounded-lg border ${theme === 'light'
-                                                  ? 'bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                                                  : 'border-gray-200 dark:border-gray-700'
+                                             ? 'bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                                             : 'border-gray-200 dark:border-gray-700'
                                              }`}
                                    >
                                         ☀️ Light
@@ -144,8 +167,8 @@ export function SettingsDialog({ isOpen, onClose }: SettingsDialogProps) {
                                    <button
                                         onClick={() => setTheme('dark')}
                                         className={`flex-1 px-3 py-2 text-sm rounded-lg border ${theme === 'dark'
-                                                  ? 'bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                                                  : 'border-gray-200 dark:border-gray-700'
+                                             ? 'bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                                             : 'border-gray-200 dark:border-gray-700'
                                              }`}
                                    >
                                         🌙 Dark

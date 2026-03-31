@@ -37,7 +37,7 @@ export function ChatInput() {
                          value={input}
                          onChange={(e) => setInput(e.target.value)}
                          onKeyDown={handleKeyDown}
-                         placeholder="Describe your architecture... (Ctrl+Enter to send)"
+                         placeholder="Beschreib deine Software-Idee... (Ctrl+Enter)"
                          rows={1}
                          className="flex-1 resize-none px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />

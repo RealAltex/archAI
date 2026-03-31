@@ -19,6 +19,7 @@
           "@dagrejs/dagre": "^1.1.4",
           "@xyflow/react": "^12.4.4",
           "electron-store": "^10.0.0",
+          "lucide-react": "^1.7.0",
           "nanoid": "^5.0.9",
           "openai": "^4.77.0",
           "react": "^19.0.0",

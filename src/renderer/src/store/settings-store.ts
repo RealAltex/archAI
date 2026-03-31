@@ -19,11 +19,13 @@ interface SettingsStore {
      llmConfig: LLMConfig
      theme: Theme
      isLoaded: boolean
+     hasApiKey: boolean
 
      loadSettings: () => Promise<void>
      updateLLMConfig: (config: Partial<LLMConfig>) => void
      setProvider: (provider: LLMProvider) => void
      setTheme: (theme: Theme) => void
+     setApiKey: (apiKey: string) => Promise<void>
      saveSettings: () => Promise<void>
 }
 
@@ -31,6 +33,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
      llmConfig: DEFAULT_LLM_CONFIG,
      theme: 'system',
      isLoaded: false,
+     hasApiKey: false,
 
      loadSettings: async () => {
           const settings = await window.electronAPI.settings.getAll()
@@ -39,6 +42,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
           set({
                llmConfig: (settings.llmConfig as LLMConfig) || DEFAULT_LLM_CONFIG,
                theme,
+               hasApiKey: Boolean(settings.hasApiKey),
                isLoaded: true
           })
 
@@ -75,6 +79,11 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
           applyThemeToDOM(theme)
           set({ theme })
           get().saveSettings()
+     },
+
+     setApiKey: async (apiKey: string) => {
+          await window.electronAPI.settings.setApiKey(apiKey)
+          set({ hasApiKey: apiKey.length > 0 })
      },
 
      saveSettings: async () => {
