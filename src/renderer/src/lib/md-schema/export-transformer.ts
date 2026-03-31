@@ -1,5 +1,28 @@
 import type { ArchitectureData } from '../../types/architecture'
 
+const DEFAULT_LEVEL_ORDER = ['system', 'container', 'component', 'code'] as const
+const DEFAULT_LEVEL_TITLES: Record<string, string> = {
+     system: 'Systems',
+     container: 'Containers',
+     component: 'Components',
+     code: 'Code Elements'
+}
+
+function toTitleCase(input: string): string {
+     return input
+          .replace(/[_-]+/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim()
+          .replace(/\b\w/g, (c) => c.toUpperCase())
+}
+
+function levelTitle(level: string): string {
+     const predefined = DEFAULT_LEVEL_TITLES[level]
+     if (predefined) return predefined
+     const title = toTitleCase(level)
+     return title.endsWith('s') ? title : `${title}s`
+}
+
 export function transformToExportMD(data: ArchitectureData): string {
      const lines: string[] = []
 
@@ -12,27 +35,35 @@ export function transformToExportMD(data: ArchitectureData): string {
      const nodeMap = new Map(data.nodes.map((n) => [n.id, n]))
 
      // Overview
-     const counts = {
-          system: data.nodes.filter((n) => n.level === 'system').length,
-          container: data.nodes.filter((n) => n.level === 'container').length,
-          component: data.nodes.filter((n) => n.level === 'component').length,
-          code: data.nodes.filter((n) => n.level === 'code').length
+     const counts = new Map<string, number>()
+     for (const node of data.nodes) {
+          counts.set(node.level, (counts.get(node.level) || 0) + 1)
      }
+
+     const orderedLevels = [
+          ...DEFAULT_LEVEL_ORDER.filter((level) => counts.has(level)),
+          ...Array.from(counts.keys())
+               .filter((level) => !DEFAULT_LEVEL_ORDER.includes(level as (typeof DEFAULT_LEVEL_ORDER)[number]))
+               .sort((a, b) => a.localeCompare(b))
+     ]
+
      lines.push('## Overview')
-     lines.push(
-          `This architecture consists of ${counts.system} system(s), ${counts.container} container(s), ${counts.component} component(s), and ${counts.code} code element(s).`
-     )
+     if (orderedLevels.length === 0) {
+          lines.push('This architecture currently has no nodes.')
+     } else {
+          const summary = orderedLevels
+               .map((level) => `${counts.get(level) || 0} ${levelTitle(level).toLowerCase()}`)
+               .join(', ')
+          lines.push(`This architecture consists of ${summary}.`)
+     }
      lines.push('')
 
      // Detail each level
-     const levels = ['system', 'container', 'component', 'code'] as const
-     const levelTitles = { system: 'Systems', container: 'Containers', component: 'Components', code: 'Code Elements' }
-
-     for (const level of levels) {
+     for (const level of orderedLevels) {
           const nodes = data.nodes.filter((n) => n.level === level)
           if (nodes.length === 0) continue
 
-          lines.push(`## ${levelTitles[level]}`)
+          lines.push(`## ${levelTitle(level)}`)
           lines.push('')
 
           for (const node of nodes) {

@@ -8,7 +8,7 @@ import {
      useReactFlow
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Copy, Trash2 } from 'lucide-react'
 import { useArchitectureStore } from '../../store/architecture-store'
 import { useSettingsStore } from '../../store/settings-store'
@@ -34,6 +34,14 @@ export function ArchitectureCanvas() {
 
      const selectedNodeIds = nodes.filter((n) => n.selected).map((n) => n.id)
 
+     const layoutSignature = useMemo(
+          () => nodes
+               .map((node) => `${node.id}:${Math.round(node.position.x)}:${Math.round(node.position.y)}`)
+               .sort()
+               .join('|'),
+          [nodes]
+     )
+
      const colorMode =
           theme === 'system'
                ? window.matchMedia('(prefers-color-scheme: dark)').matches
@@ -42,17 +50,15 @@ export function ArchitectureCanvas() {
                : theme
 
      useEffect(() => {
-          if (nodes.length > 0 && nodes.length !== prevNodeCount.current) {
-               prevNodeCount.current = nodes.length
-               setTimeout(() => fitView({ padding: 0.2, duration: 300 }), 50)
-          }
+          const countChanged = nodes.length !== prevNodeCount.current
+          const directionChanged = layoutDirection !== prevLayoutDir.current
 
-          // Auch bei Layout-Direction Änderung neu layouten
-          if (layoutDirection !== prevLayoutDir.current) {
+          if (countChanged || directionChanged || nodes.length > 0) {
+               prevNodeCount.current = nodes.length
                prevLayoutDir.current = layoutDirection
-               setTimeout(() => fitView({ padding: 0.2, duration: 300 }), 50)
+               setTimeout(() => fitView({ padding: 0.22, duration: 320 }), 40)
           }
-     }, [nodes.length, layoutDirection, fitView])
+     }, [layoutSignature, nodes.length, layoutDirection, fitView])
 
      const onNodeContextMenu = useCallback(
           (event: React.MouseEvent, node: { id: string }) => {
@@ -91,6 +97,7 @@ export function ArchitectureCanvas() {
                     multiSelectionKeyCode="Shift"
                     selectionOnDrag
                     selectNodesOnDrag
+                    defaultEdgeOptions={{ type: 'smoothstep' }}
                     style={{ background: 'var(--canvas-bg)' }}
                >
                     <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="var(--canvas-dot)" />

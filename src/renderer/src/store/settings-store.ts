@@ -4,6 +4,17 @@ import { DEFAULT_LLM_CONFIG, PROVIDER_DEFAULTS } from '../types/llm'
 
 type Theme = 'light' | 'dark' | 'system'
 
+function normalizeLLMConfig(value: unknown): LLMConfig {
+     if (!value || typeof value !== 'object') return DEFAULT_LLM_CONFIG
+
+     const partial = value as Partial<LLMConfig>
+     return {
+          ...DEFAULT_LLM_CONFIG,
+          ...partial,
+          notesDensity: partial.notesDensity === 'standard' ? 'standard' : 'dense'
+     }
+}
+
 function getEffectiveDark(theme: Theme): boolean {
      if (theme === 'system') {
           return window.matchMedia('(prefers-color-scheme: dark)').matches
@@ -40,7 +51,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
           const theme = (settings.theme as Theme) || 'system'
           applyThemeToDOM(theme)
           set({
-               llmConfig: (settings.llmConfig as LLMConfig) || DEFAULT_LLM_CONFIG,
+               llmConfig: normalizeLLMConfig(settings.llmConfig),
                theme,
                hasApiKey: Boolean(settings.hasApiKey),
                isLoaded: true

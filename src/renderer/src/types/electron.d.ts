@@ -1,13 +1,21 @@
 export interface IElectronAPI {
      llm: {
           startStream: (messages: Array<{ role: string; content: string }>, config: {
-               provider: string; baseURL: string;
-               model: string; temperature: number; maxTokens: number
-          }) => void
-          onChunk: (callback: (chunk: string) => void) => () => void
-          onEnd: (callback: () => void) => () => void
-          onError: (callback: (error: string) => void) => () => void
-          abort: () => void
+               provider: string
+               baseURL: string
+               model: string
+               temperature: number
+               maxTokens: number
+               deepPlanningMode?: boolean
+               targetNodeCount?: number
+               maxHierarchyDepth?: number
+               planningPasses?: number
+               notesDensity?: 'standard' | 'dense'
+          }, streamId: string) => void
+          onChunk: (callback: (streamId: string, chunk: string) => void) => () => void
+          onEnd: (callback: (streamId: string) => void) => () => void
+          onError: (callback: (streamId: string, error: string) => void) => () => void
+          abort: (streamId?: string) => void
      }
      settings: {
           get: (key: string) => Promise<unknown>

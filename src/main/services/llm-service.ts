@@ -10,11 +10,8 @@ interface LLMStreamConfig {
 }
 
 class LLMService {
-     private client: OpenAI | null = null
-     private abortController: AbortController | null = null
-
-     configure(config: LLMStreamConfig): void {
-          this.client = new OpenAI({
+     private createClient(config: LLMStreamConfig): OpenAI {
+          return new OpenAI({
                apiKey: config.apiKey || 'not-needed',
                baseURL: config.baseURL
           })
@@ -22,14 +19,12 @@ class LLMService {
 
      async *streamChat(
           messages: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>,
-          config: LLMStreamConfig
+          config: LLMStreamConfig,
+          signal?: AbortSignal
      ): AsyncGenerator<string> {
-          this.configure(config)
-          if (!this.client) throw new Error('LLM client not configured')
+          const client = this.createClient(config)
 
-          this.abortController = new AbortController()
-
-          const stream = await this.client.chat.completions.create(
+          const stream = await client.chat.completions.create(
                {
                     model: config.model,
                     messages,
@@ -37,18 +32,13 @@ class LLMService {
                     temperature: config.temperature,
                     max_tokens: config.maxTokens
                },
-               { signal: this.abortController.signal }
+               { signal }
           )
 
           for await (const chunk of stream) {
                const content = chunk.choices[0]?.delta?.content
                if (content) yield content
           }
-     }
-
-     abort(): void {
-          this.abortController?.abort()
-          this.abortController = null
      }
 }
 

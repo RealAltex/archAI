@@ -13,14 +13,14 @@ export function ChatPanel() {
 
      // Register IPC listeners for LLM streaming
      useEffect(() => {
-          const unsubChunk = window.electronAPI.llm.onChunk((chunk) => {
-               useChatStore.getState().appendChunk(chunk)
+          const unsubChunk = window.electronAPI.llm.onChunk((streamId, chunk) => {
+               useChatStore.getState().appendChunk(streamId, chunk)
           })
-          const unsubEnd = window.electronAPI.llm.onEnd(() => {
-               useChatStore.getState().endStream()
+          const unsubEnd = window.electronAPI.llm.onEnd((streamId) => {
+               useChatStore.getState().endStream(streamId)
           })
-          const unsubError = window.electronAPI.llm.onError((error) => {
-               useChatStore.getState().setError(error)
+          const unsubError = window.electronAPI.llm.onError((streamId, error) => {
+               useChatStore.getState().setError(streamId, error)
           })
 
           return () => {

@@ -1,4 +1,16 @@
-export type NodeLevel = 'system' | 'container' | 'component' | 'code'
+export const DEFAULT_NODE_LEVELS = ['system', 'container', 'component', 'code'] as const
+export type DefaultNodeLevel = (typeof DEFAULT_NODE_LEVELS)[number]
+
+// Open level model: allows arbitrary/deeper levels beyond the default 4.
+export type NodeLevel = string
+
+export interface ArchNodeNotes {
+     summary?: string
+     responsibilities?: string[]
+     decisions?: string[]
+     risks?: string[]
+     nextSteps?: string[]
+}
 
 export interface ArchNode {
      id: string
@@ -9,6 +21,7 @@ export interface ArchNode {
      technology?: string
      tags?: string[]
      notes?: string
+     noteBlocks?: ArchNodeNotes
      position?: { x: number; y: number }
 }
 

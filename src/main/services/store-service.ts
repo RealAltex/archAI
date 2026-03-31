@@ -12,7 +12,12 @@ const store = new Store({
                baseURL: 'https://api.openai.com/v1',
                model: 'gpt-4o',
                temperature: 0.7,
-               maxTokens: 4096
+               maxTokens: 4096,
+               deepPlanningMode: true,
+               targetNodeCount: 450,
+               maxHierarchyDepth: 12,
+               planningPasses: 4,
+               notesDensity: 'dense'
           },
           encryptedApiKey: '',
           theme: 'dark',

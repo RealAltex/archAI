@@ -141,6 +141,96 @@ export function SettingsDialog({ isOpen, onClose }: SettingsDialogProps) {
                               />
                          </div>
 
+                         <div className="border-t border-gray-200 dark:border-gray-700 pt-4 space-y-4">
+                              <div className="flex items-center justify-between gap-4">
+                                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        Deep Planning Mode
+                                   </label>
+                                   <button
+                                        onClick={() => updateLLMConfig({ deepPlanningMode: !llmConfig.deepPlanningMode })}
+                                        className={`px-3 py-1.5 text-xs rounded-lg border transition-colors ${llmConfig.deepPlanningMode
+                                             ? 'bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                                             : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300'}`}
+                                   >
+                                        {llmConfig.deepPlanningMode ? 'Enabled' : 'Disabled'}
+                                   </button>
+                              </div>
+
+                              <div>
+                                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Target Nodes: {llmConfig.targetNodeCount}
+                                   </label>
+                                   <input
+                                        title="Target nodes"
+                                        type="range"
+                                        min="100"
+                                        max="1200"
+                                        step="10"
+                                        value={llmConfig.targetNodeCount}
+                                        onChange={(e) => updateLLMConfig({ targetNodeCount: parseInt(e.target.value, 10) })}
+                                        className="w-full"
+                                   />
+                              </div>
+
+                              <div>
+                                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Max Hierarchy Depth: {llmConfig.maxHierarchyDepth}
+                                   </label>
+                                   <input
+                                        title="Max hierarchy depth"
+                                        type="range"
+                                        min="4"
+                                        max="20"
+                                        step="1"
+                                        value={llmConfig.maxHierarchyDepth}
+                                        onChange={(e) => updateLLMConfig({ maxHierarchyDepth: parseInt(e.target.value, 10) })}
+                                        className="w-full"
+                                   />
+                              </div>
+
+                              <div>
+                                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Planning Passes
+                                   </label>
+                                   <select
+                                        title="Planning passes"
+                                        value={llmConfig.planningPasses}
+                                        onChange={(e) => updateLLMConfig({ planningPasses: parseInt(e.target.value, 10) })}
+                                        className="w-full px-3 py-2 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg"
+                                   >
+                                        <option value={1}>1 pass</option>
+                                        <option value={2}>2 passes</option>
+                                        <option value={3}>3 passes</option>
+                                        <option value={4}>4 passes</option>
+                                        <option value={5}>5 passes</option>
+                                   </select>
+                              </div>
+
+                              <div>
+                                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Notes Density
+                                   </label>
+                                   <div className="flex gap-2">
+                                        <button
+                                             onClick={() => updateLLMConfig({ notesDensity: 'standard' })}
+                                             className={`flex-1 px-3 py-2 text-sm rounded-lg border ${llmConfig.notesDensity === 'standard'
+                                                  ? 'bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                                                  : 'border-gray-200 dark:border-gray-700'}`}
+                                        >
+                                             Standard
+                                        </button>
+                                        <button
+                                             onClick={() => updateLLMConfig({ notesDensity: 'dense' })}
+                                             className={`flex-1 px-3 py-2 text-sm rounded-lg border ${llmConfig.notesDensity === 'dense'
+                                                  ? 'bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                                                  : 'border-gray-200 dark:border-gray-700'}`}
+                                        >
+                                             Dense
+                                        </button>
+                                   </div>
+                              </div>
+                         </div>
+
                          <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                    Theme

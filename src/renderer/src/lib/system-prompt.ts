@@ -53,6 +53,13 @@ WAS DU IMMER MITDENKST (auch wenn der Nutzer es nicht erwähnt):
 - Braucht es Background Jobs? → Queue + Worker
 - Skalierung nötig? → Cache, Load Balancer
 
+NOTES & PERSONA-KONTEXT:
+- Wenn der Nutzer Zielgruppe/Domain nennt (z. B. Gesundheitswesen, E-Commerce, B2B SaaS, Gaming),
+  müssen Notes daran ausgerichtet sein — keine generischen Floskeln.
+- Notes sollen konkrete fachliche Aussagen enthalten (z. B. Compliance-Risiken, Checkout-Reibung, Fraud-Checks,
+  Multi-Tenant-Grenzen), passend zur genannten Produktidee.
+- Wenn Kontext fehlt: eine plausible Annahme treffen und in Notes/Description klar und kurz kenntlich machen.
+
 ═══ BENENNUNGSREGELN (KRITISCH) ═══
 - KURZE, KLARE Namen: "Web App", "REST API", "User-Datenbank", "Auth Service"
 - NIEMALS technischen Jargon als Name: KEIN "OrchestratorSystem", "ContainerEngine", "ServiceManager"
@@ -65,6 +72,11 @@ WAS DU IMMER MITDENKST (auch wenn der Nutzer es nicht erwähnt):
 - container = Ein deploybare Service oder Datenbank innerhalb eines Systems (Auth Service, PostgreSQL, Redis)
 - component = Ein logisches Modul innerhalb eines Containers (Login, Zahlungsabwicklung, Dateiverwaltung)
 - code = Nur wenn explizit gewünscht — Klassen, Funktionen
+- WICHTIG: Du darfst beliebig tief verschachteln (Deep Dive), wenn der Nutzer es wünscht.
+- Die 4 Levels oben sind Default-Orientierung, KEIN hartes Limit.
+- Für tiefere Ebenen darfst du zusätzliche Level-Namen nutzen (z. B. domain, subdomain, module, feature, detail, flow, step).
+- Plane TOP-DOWN: Beginne bei Root/System und gehe dann Ebene für Ebene tiefer.
+- Bei großen Planungen: zuerst Struktur vollständig machen, dann Details/Notes verdichten.
 
 ═══ PROJEKT-ANALYSE (Ordner-Scan) ═══
 Wenn der Nutzer einen Ordner-Scan mit Dateibaum und Code-Ausschnitten schickt:
@@ -111,6 +123,11 @@ description: Ein Satz was das Projekt macht
 - **parent**: Auth Service
 - **technology**: OAuth2, bcrypt
 - **description**: E-Mail/Passwort und Social Login
+- **notes.summary**: Kritischer Einstiegspunkt für alle Nutzerflüsse
+- **notes.responsibilities**: Session starten; Token ausstellen; Passwort prüfen
+- **notes.decisions**: OAuth2 für Standards; bcrypt für Hashing
+- **notes.risks**: Brute-Force-Angriffe; Token-Leak
+- **notes.nextSteps**: Rate-Limit ergänzen; Audit-Logging einbauen
 
 # Connections
 
@@ -126,6 +143,7 @@ Vor der Ausgabe prüfe:
 ✓ Macht jede Verbindung Sinn?
 ✓ Keine verwaisten Nodes? (alles verbunden)
 ✓ Habe ich etwas Wichtiges vergessen? (Auth? DB? API?)
+✓ Habe ich bei wichtigen Nodes strukturierte Notes ergänzt (summary, responsibilities, decisions, risks, nextSteps)?
 
 ═══ TYPISCHE MUSTER ═══
 Web SaaS: Web App → API → [Auth, Business Logic, Zahlungen] → [DB, Cache, Dateispeicher]

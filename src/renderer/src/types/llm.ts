@@ -6,6 +6,11 @@ export interface LLMConfig {
      model: string
      temperature: number
      maxTokens: number
+     deepPlanningMode: boolean
+     targetNodeCount: number
+     maxHierarchyDepth: number
+     planningPasses: number
+     notesDensity: 'standard' | 'dense'
 }
 
 export const DEFAULT_LLM_CONFIG: LLMConfig = {
@@ -13,7 +18,12 @@ export const DEFAULT_LLM_CONFIG: LLMConfig = {
      baseURL: 'https://api.openai.com/v1',
      model: 'gpt-4o',
      temperature: 0.7,
-     maxTokens: 4096
+     maxTokens: 4096,
+     deepPlanningMode: true,
+     targetNodeCount: 450,
+     maxHierarchyDepth: 12,
+     planningPasses: 4,
+     notesDensity: 'dense'
 }
 
 export const PROVIDER_DEFAULTS: Record<LLMProvider, { baseURL: string; model: string }> = {

@@ -3,28 +3,36 @@ import { IPC } from '../shared/ipc-channels'
 
 contextBridge.exposeInMainWorld('electronAPI', {
      llm: {
-          startStream: (messages, config) => {
+          startStream: (messages, config, streamId) => {
                // Strip apiKey if accidentally included — main process handles it securely
                const { apiKey: _stripped, ...safeConfig } = config
-               ipcRenderer.send(IPC.LLM_STREAM_START, messages, safeConfig)
+               ipcRenderer.send(IPC.LLM_STREAM_START, {
+                    messages,
+                    config: safeConfig,
+                    streamId
+               })
           },
-          onChunk: (callback: (chunk: string) => void) => {
-               const handler = (_event: Electron.IpcRendererEvent, chunk: string) => callback(chunk)
+          onChunk: (callback: (streamId: string, chunk: string) => void) => {
+               const handler = (_event: Electron.IpcRendererEvent, payload: { streamId: string; chunk: string }) => {
+                    callback(payload.streamId, payload.chunk)
+               }
                ipcRenderer.on(IPC.LLM_STREAM_CHUNK, handler)
                return () => ipcRenderer.removeListener(IPC.LLM_STREAM_CHUNK, handler)
           },
-          onEnd: (callback: () => void) => {
-               const handler = () => callback()
+          onEnd: (callback: (streamId: string) => void) => {
+               const handler = (_event: Electron.IpcRendererEvent, payload: { streamId: string }) => callback(payload.streamId)
                ipcRenderer.on(IPC.LLM_STREAM_END, handler)
                return () => ipcRenderer.removeListener(IPC.LLM_STREAM_END, handler)
           },
-          onError: (callback: (error: string) => void) => {
-               const handler = (_event: Electron.IpcRendererEvent, error: string) => callback(error)
+          onError: (callback: (streamId: string, error: string) => void) => {
+               const handler = (_event: Electron.IpcRendererEvent, payload: { streamId: string; error: string }) => {
+                    callback(payload.streamId, payload.error)
+               }
                ipcRenderer.on(IPC.LLM_STREAM_ERROR, handler)
                return () => ipcRenderer.removeListener(IPC.LLM_STREAM_ERROR, handler)
           },
-          abort: () => {
-               ipcRenderer.send(IPC.LLM_ABORT)
+          abort: (streamId?: string) => {
+               ipcRenderer.send(IPC.LLM_ABORT, { streamId })
           }
      },
      settings: {
