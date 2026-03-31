@@ -1,0 +1,24 @@
+appId: com.archai.app
+productName: archAI
+directories:
+  buildResources: build
+files:
+  - '!**/.vscode/*'
+  - '!src/*'
+  - '!electron.vite.config.*'
+  - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,tsconfig.*}'
+win:
+  executableName: archAI
+  target: nsis
+nsis:
+  artifactName: ${name}-${version}-setup.${ext}
+  shortcutName: ${productName}
+  uninstallDisplayName: ${productName}
+  createDesktopShortcut: always
+mac:
+  target: dmg
+  entitlementsInherit: build/entitlements.mac.plist
+linux:
+  target: AppImage
+  maintainer: archAI
+  category: Development
